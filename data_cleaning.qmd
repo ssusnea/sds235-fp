@@ -1,0 +1,116 @@
+---
+title: "data cleaning"
+format: html
+---
+```{r}
+library(readxl)
+library(dplyr)
+```
+
+```{r}
+# Specify the file path
+file_path <- "FoodImports.xlsx"
+
+# Get all sheet names
+sheet_names <- excel_sheets(file_path)
+
+# Read each sheet, skip the first two rows, and set column names
+sheets_list <- lapply(sheet_names, function(sheet) {
+  # Read the sheet, skipping the first two rows
+  data <- read_excel(file_path, sheet = sheet, skip = 2)
+  
+  # Set column names from the first row of the skipped data
+  colnames(data) <- as.character(data[1, ])
+  
+  # Remove the first row used for column names
+  data <- data[-1, ]
+  
+  # Return the cleaned data
+  return(data)
+})
+
+# Name the list elements with sheet names
+names(sheets_list) <- sheet_names
+
+# Optional: Assign each sheet as a separate data.frame in the global environment
+list2env(sheets_list, envir = .GlobalEnv)
+
+```
+
+```{r}
+dataset_names <- c("Animals", "Beverages", "Cocoa", "Coffee", "Dairy", "Fish","Fruits","Grains", "Meats", "Nuts", "Other", "Sweets", "Vegetables", "VegOils")
+```
+
+```{r}
+for (dataset_name in dataset_names) {
+  # Retrieve the dataset by name
+  dataset <- get(dataset_name)
+  
+  # Rename the first column (unnamed) to 'category'
+  colnames(dataset)[1] <- "category"
+  colnames(dataset)[3] <- "country"
+  colnames(dataset)[4] <- "unit"
+  dataset <- dataset[, -2]
+  
+  # Remove rows where all values are NA
+  dataset <- dataset[rowSums(is.na(dataset)) < ncol(dataset), ]
+  
+  # Replace missing values in 'category' with the value above
+  for (i in 2:nrow(dataset)) { # Start from the second row
+    if (is.na(dataset$category[i])) { # Check if the current value is NA
+      dataset$category[i] <- dataset$category[i - 1] # Replace it with the value above
+    }
+  }
+  
+  # Remove rows with any NA values
+  dataset <- na.omit(dataset)
+  
+  dataset <- pivot_longer(
+    data = dataset,
+    cols = 4:last_col(), # Specify the range of columns
+    names_to = "year",   # Create a column to hold the pivoted column names
+    values_to = "value"  # Create a column to hold the pivoted values
+  )
+  
+  # Create a new name for the cleaned dataset (e.g., "Animals_clean")
+  cleaned_name <- paste0(dataset_name, "_clean")
+  
+  # Assign the cleaned dataset to the new name
+  assign(cleaned_name, dataset)
+}
+
+# Remove the temporary dataset variable
+rm(dataset)
+```
+
+
+```{r}
+# save cleaned datasets into a list
+# Remove original dataset names using unname()
+dataset_names_cleaned <- unname(sapply(dataset_names, function(dataset_name) paste0(dataset_name, "_clean")))
+
+# Print the cleaned dataset names
+dataset_names_cleaned
+```
+
+
+```{r}
+# Specify the folder where the cleaned CSV files will be saved
+folder_path <- "cleaned_data"
+
+# Loop through each cleaned dataset name
+for (cleaned_name in dataset_names_cleaned) {
+  # Retrieve the dataset by its name
+  dataset <- get(cleaned_name)
+  
+  # Create the file path by appending the folder path and file name
+  file_path <- file.path(folder_path, paste0(cleaned_name, ".csv"))
+  
+  # Write the dataset to a CSV file in the specified folder
+  write.csv(dataset, file = file_path, row.names = FALSE)
+}
+
+# Remove the temporary dataset variable
+rm(dataset)
+```
+
