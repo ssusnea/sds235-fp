@@ -85,19 +85,6 @@ rm(dataset)
 
 
 ```{r}
-library(tidyr)
-
-animals <- Animals |> 
-  pivot_longer(
-    data = dataset,
-    cols = 4:last_col(), # Specify the range of columns
-    names_to = "year",   # Create a column to hold the pivoted column names
-    values_to = "value"  # Create a column to hold the pivoted values
-  )
-```
-
-
-```{r}
 # save cleaned datasets into a list
 # Remove original dataset names using unname()
 dataset_names_cleaned <- unname(sapply(dataset_names, function(dataset_name) paste0(dataset_name, "_clean")))
@@ -106,19 +93,24 @@ dataset_names_cleaned <- unname(sapply(dataset_names, function(dataset_name) pas
 dataset_names_cleaned
 ```
 
+
 ```{r}
-# save datasets as csv:
+# Specify the folder where the cleaned CSV files will be saved
+folder_path <- "cleaned_data"
 
 # Loop through each cleaned dataset name
 for (cleaned_name in dataset_names_cleaned) {
   # Retrieve the dataset by its name
   dataset <- get(cleaned_name)
   
-  # Create the file path (e.g., "Animals_clean.csv", "Beverages_clean.csv", etc.)
-  file_path <- paste0(cleaned_name, ".csv")
+  # Create the file path by appending the folder path and file name
+  file_path <- file.path(folder_path, paste0(cleaned_name, ".csv"))
   
-  # Write the dataset to a CSV file
+  # Write the dataset to a CSV file in the specified folder
   write.csv(dataset, file = file_path, row.names = FALSE)
 }
+
+# Remove the temporary dataset variable
+rm(dataset)
 ```
 
