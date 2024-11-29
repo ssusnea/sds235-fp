@@ -1,0 +1,27 @@
+---
+title: "explore map"
+format: html
+---
+
+```{python}
+# import the package to create the map
+import folium
+```
+
+
+```{python}
+# create the basic map 
+
+m = folium.Map(zoom_start=12)
+
+outfp = "base_map.html"
+
+m.save(outfp)
+```
+
+```{python}
+# read in the data to add as layers to the map: 
+
+fp = "cleaned_data/Animals_clean.csv"
+```
+

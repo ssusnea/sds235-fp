@@ -5,6 +5,7 @@ format: html
 ```{r}
 library(readxl)
 library(dplyr)
+library(tidyverse)
 ```
 
 ```{r}
@@ -14,10 +15,14 @@ file_path <- "FoodImports.xlsx"
 # Get all sheet names
 sheet_names <- excel_sheets(file_path)
 
+# subset to only get the sheets with prices
+sheet_names <- sheet_names[6:19]
+
 # Read each sheet, skip the first two rows, and set column names
 sheets_list <- lapply(sheet_names, function(sheet) {
   # Read the sheet, skipping the first two rows
-  data <- read_excel(file_path, sheet = sheet, skip = 2)
+  # Also tell R how to interpret the numeric columns
+  data <- read_excel(file_path, sheet = sheet, skip = 2, col_types = c("guess", "guess", "guess", "guess", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric"))
   
   # Set column names from the first row of the skipped data
   colnames(data) <- as.character(data[1, ])
@@ -71,6 +76,9 @@ for (dataset_name in dataset_names) {
     names_to = "year",   # Create a column to hold the pivoted column names
     values_to = "value"  # Create a column to hold the pivoted values
   )
+  
+  # regex work to clean up observations: 
+  dataset$category <- gsub("\\d\\/", "", dataset$category)
   
   # Create a new name for the cleaned dataset (e.g., "Animals_clean")
   cleaned_name <- paste0(dataset_name, "_clean")
