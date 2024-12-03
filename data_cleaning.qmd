@@ -129,9 +129,7 @@ for (cleaned_name in dataset_names_cleaned) {
   write.csv(dataset, file = file_path, row.names = FALSE)
 }
 
-file_path <- file.path(folder_path, "Stacked_data.csv")
-
-write.csv(stacked, file = file_path, row.names = FALSE)
+write_csv(stack, file = "cleaned_data/Stacked_data.csv")
 
 # Remove the temporary dataset variable
 rm(dataset)
