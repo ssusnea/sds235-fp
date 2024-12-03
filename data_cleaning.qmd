@@ -135,3 +135,38 @@ write_csv(stack, file = "cleaned_data/Stacked_data.csv")
 rm(dataset)
 ```
 
+
+```{r}
+#modifying aggregated data set
+stacked_data = read_csv("cleaned_data/Stacked_data.csv")
+
+
+#adds general category; removes existing "total" rows, total world data, unit col, and irrelevant quantity units
+stacked_data <- stacked_data |>
+  relocate(sheet, .before = category) |>
+  filter(!grepl("Total", category)) |>
+  rename("subcategory" = "category",
+         "category" = "sheet") |>
+  filter(!grepl("quantity", country)) |>
+  filter(country != "Rest of world" & country != "World") |>
+  select(-unit)
+
+#creates new data frame with totals for each country + category
+category_totals <- stacked_data |>
+  group_by(category, country, year) |>
+  summarize(value = sum(value),
+            subcategory = "Total") |>
+  ungroup()
+
+
+#adds new totals to existing stacked data frame
+stacked_data <- rbind(stacked_data, category_totals)
+
+
+#writes to csv file
+write_csv(stacked_data, file = "cleaned_data/Stacked_data.csv")
+
+# Remove the temporary dataset variables
+rm(category_totals, stacked_data)
+```
+
