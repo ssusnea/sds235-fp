@@ -80,6 +80,9 @@ for (dataset_name in dataset_names) {
   # regex work to clean up observations: 
   dataset$category <- gsub("\\d\\/", "", dataset$category)
   
+  # create colum with sheet name as variable
+  dataset$sheet <- c(dataset_name, recursive = TRUE)
+  
   # Create a new name for the cleaned dataset (e.g., "Animals_clean")
   cleaned_name <- paste0(dataset_name, "_clean")
   
@@ -101,6 +104,14 @@ dataset_names_cleaned <- unname(sapply(dataset_names, function(dataset_name) pas
 dataset_names_cleaned
 ```
 
+```{r}
+# stack all data frames: 
+
+stack <- rbind(Animals_clean, Beverages_clean, Cocoa_clean, Coffee_clean, Dairy_clean, Fish_clean, Fruits_clean, Grains_clean, Meats_clean, Nuts_clean, Other_clean, Sweets_clean, Vegetables_clean, VegOils_clean)
+
+```
+
+
 
 ```{r}
 # Specify the folder where the cleaned CSV files will be saved
@@ -117,6 +128,10 @@ for (cleaned_name in dataset_names_cleaned) {
   # Write the dataset to a CSV file in the specified folder
   write.csv(dataset, file = file_path, row.names = FALSE)
 }
+
+file_path <- file.path(folder_path, "Stacked_data.csv")
+
+write.csv(stacked, file = file_path, row.names = FALSE)
 
 # Remove the temporary dataset variable
 rm(dataset)
