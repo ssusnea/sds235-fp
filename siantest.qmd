@@ -1,0 +1,44 @@
+---
+title: "Sian Test Doc"
+format: html
+---
+
+```{python}
+import geopandas as gpd
+import matplotlib.pyplot as plt
+import pandas as pd
+```
+
+```{python}
+file_path = "map_shapefiles/ne_110m_admin_0_countries.shp"
+world = gpd.read_file(file_path)
+
+world.plot()
+plt.title("World Map")
+plt.show()
+```
+
+```{python}
+df = pd.read_csv('cleaned_data/stacked_data.csv', delimiter=',', engine ='python') #dataframe
+
+df_filtered = df[(df['category'] == "Vegetables") & (df['subcategory'] == "Total") & (df['year'] == 2023)]
+
+
+
+merged = world.merge(df_filtered, left_on='SOVEREIGNT', right_on='country', how='left')
+
+merged.plot(column='value', 
+            # cmap='YlOrRd',
+            cmap=plt.get_cmap('viridis') ,     # Color map
+            legend=True,       # Display a legend
+            missing_kwds={"color": "lightgrey", "label": "No Data"})  # Handle missing data
+
+# Add a title
+plt.title("Custom Gradient Map Based on Value")
+plt.show()
+```
+
+
+
+
+
